@@ -1,18 +1,206 @@
-/* Optional shared base styles. Apps can import this from `@kinnijije/ui/styles.css`
-   on top of their own Tailwind layer. Mirror the tokens in
-   packages/ui/src/theme/index.ts when re-theming. */
+/* KinniJije shared base styles — buka-signboard stance.
+   Apps import this from `@kinnijije/ui/styles.css` on top of their own
+   Tailwind layer. The CSS variables here are the runtime source of truth that
+   components consume via Tailwind arbitrary values, e.g. bg-[var(--danfo)].
+   Mirror the tokens in packages/ui/src/theme/index.ts when re-theming.
+
+   Fonts are loaded by the consuming app via @fontsource imports in its entry
+   (see apps/web/src/main.tsx). The @import below is a fallback for standalone
+   use of this stylesheet without a bundler font setup. */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 :root {
-  --brand: #1e3a8a;
-  --brand-strong: #1d4ed8;
-  --surface: #f8fafc;
-  --accent: #ea580c;
-  --ink: #0f172a;
+  /* Paper & ink */
+  --paper: #f8efdf;
+  --paper-deep: #f1e5ce;
+  --sheet: #fffdf7;
+  --ink: #221a12;
+  --ink-2: #45392b;
+  --ink-3: #7c6e5c;
+  --ink-4: #ac9f8b;
+  --hair: #e6d9c2;
+  --hair-2: #d8c8ac;
+
+  /* Danfo yellow — the one action colour */
+  --danfo: #edae05;
+  --danfo-deep: #c99204;
+  --danfo-press: #a37703;
+  --danfo-tint: #faf0cf;
+  --danfo-edge: #e5ce85;
+  --danfo-soft: #f6df8e;
+
+  /* Reserved semantics */
+  --have: #3e7a3a;
+  --have-bg: #e9f1e4;
+  --have-edge: #bfd6b8;
+  --crit: #a11212;
+  --crit-bg: #f6e4e1;
+  --crit-edge: #e2b6ae;
+  --warn: #9c4a0e;
+  --warn-bg: #f8ebdc;
+  --warn-edge: #e5c6a4;
+
+  /* Type */
+  --display: 'Bebas Neue', 'Inter', sans-serif;
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Tracking */
+  --track-display: 0.045em;
+  --track-h: -0.005em;
+  --track-body: 0;
+  --track-label: 0.01em;
+  --track-overline: 0.18em;
+
+  /* Geometry */
+  --r-card: 5px;
+  --r-ctrl: 4px;
+  --r-pill: 9999px;
+  --bw: 2px;
+
+  /* Paint-shadow + stripe */
+  --paint: 4px 4px 0 var(--ink);
+  --paint-sm: 3px 3px 0 var(--ink);
+  --paint-flat: 0 0 0 var(--ink);
+  --stripe: repeating-linear-gradient(45deg, var(--danfo) 0 10px, var(--ink) 10px 20px);
+
+  /* Motion */
+  --ease: cubic-bezier(0.3, 0, 0.2, 1);
+  --t-press: 120ms;
+  --t-serve: 200ms;
+  --t-settle: 300ms;
 }
 
 html,
 body {
-  font-family: 'Inter', system-ui, sans-serif;
-  background: var(--surface);
+  font-family: var(--sans);
+  background: var(--paper);
   color: var(--ink);
+  letter-spacing: var(--track-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'kern', 'calt';
+}
+
+/* Mono numerals align and scan */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+
+/* Serve-in — cards arrive like a plate set down */
+@keyframes kj-serve {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.kj-serve {
+  animation: kj-serve var(--t-serve) var(--ease) both;
+}
+
+/* Timer tick pulse */
+@keyframes kj-tick {
+  0% {
+    box-shadow: 0 0 0 0 rgba(237, 174, 5, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 8px rgba(237, 174, 5, 0);
+  }
+}
+.kj-ticking {
+  animation: kj-tick 1s var(--ease) infinite;
+}
+
+/* Indeterminate marching stripe */
+@keyframes kj-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(433%);
+  }
+}
+.kj-indeterminate {
+  animation: kj-slide 1.2s linear infinite;
+}
+
+/* Checking-pot: lid lifts, steam rises */
+@keyframes kj-lid {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+@keyframes kj-steam {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+.kj-lid {
+  animation: kj-lid 1.4s var(--ease) infinite;
+}
+.kj-steam {
+  animation: kj-steam 1.4s var(--ease) infinite;
+}
+.kj-steam-2 {
+  animation-delay: 0.45s;
+}
+.kj-steam-3 {
+  animation-delay: 0.9s;
+}
+
+/* Shimmer for skeletons */
+@keyframes kj-shimmer {
+  0% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.55;
+  }
+}
+
+.kj-skel {
+  animation: kj-shimmer 1.4s var(--ease) infinite;
+}
+
+/* Selection + scrollbar */
+::selection {
+  background: rgba(237, 174, 5, 0.4);
+  color: var(--ink);
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--hair-2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kj-serve,
+  .kj-ticking {
+    animation: none;
+  }
 }
