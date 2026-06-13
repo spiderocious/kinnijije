@@ -3,7 +3,7 @@
 **Date:** 2026-06-13
 **Branch:** main
 **Build:** Typecheck ✅ · Lint ✅ · Build ✅ · Tests ✅ (27 passing)
-**Base URL:** `http://localhost:8081/api/v1`
+**Base URL:** `http://localhost:9093/api/v1`
 **Auth header:** `Authorization: Bearer <access_token>`
 
 The whole MVP backend is implemented behind Repository ports with Zod validation
@@ -20,7 +20,7 @@ pnpm -F @kinnijije/main-backend test
 
 # Dev server (needs a Mongo + an OpenAI key unless AI_PROVIDER=mock)
 cp apps/main-backend/.env.example apps/main-backend/.env   # then fill secrets
-pnpm -F @kinnijije/main-backend dev                        # http://localhost:8081
+pnpm -F @kinnijije/main-backend dev                        # http://localhost:9093
 ```
 
 On boot the server connects to Mongo and **idempotently seeds**: the 4 feature

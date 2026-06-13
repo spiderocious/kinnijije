@@ -6,7 +6,7 @@ import { afterAll, afterEach, beforeAll } from 'vitest';
 // file is a setupFile, which Vitest evaluates before the test modules.
 process.env['NODE_ENV'] = 'test';
 process.env['AI_PROVIDER'] = 'mock';
-process.env['APP_BASE_URL'] = 'http://localhost:8081';
+process.env['APP_BASE_URL'] = 'http://localhost:9093';
 process.env['WEB_BASE_URL'] = 'http://localhost:5173';
 process.env['JWT_ACCESS_SECRET'] = 'test_access_secret_at_least_32_chars_long_xx';
 process.env['JWT_REFRESH_SECRET'] = 'test_refresh_secret_at_least_32_chars_long_x';
