@@ -4,6 +4,7 @@ import { UserModel } from '../../db/models/user.model.js';
 import type { CreateUserInput, UserRepo, UserWithSecret } from '../ports.js';
 import { buildPage, clampLimit, decodeCursor } from './cursor.js';
 import { mapUser } from './mappers.js';
+import { isValidObjectId } from './object-id.js';
 
 export class MongoUserRepo implements UserRepo {
   async create(input: CreateUserInput): Promise<User> {
@@ -17,6 +18,7 @@ export class MongoUserRepo implements UserRepo {
   }
 
   async findById(id: string): Promise<User | null> {
+    if (!isValidObjectId(id)) return null;
     const doc = await UserModel.findById(id).lean();
     return doc ? mapUser(doc) : null;
   }
@@ -28,6 +30,7 @@ export class MongoUserRepo implements UserRepo {
   }
 
   async updatePrefs(id: string, prefs: Partial<UserPrefs>): Promise<User | null> {
+    if (!isValidObjectId(id)) return null;
     const set: Record<string, unknown> = {};
     if (prefs.cuisines !== undefined) set['prefs.cuisines'] = prefs.cuisines;
     if (prefs.difficultyFloor !== undefined) set['prefs.difficultyFloor'] = prefs.difficultyFloor;
@@ -37,17 +40,19 @@ export class MongoUserRepo implements UserRepo {
   }
 
   async setStatus(id: string, status: 'active' | 'suspended'): Promise<User | null> {
+    if (!isValidObjectId(id)) return null;
     const doc = await UserModel.findByIdAndUpdate(id, { $set: { status } }, { new: true }).lean();
     return doc ? mapUser(doc) : null;
   }
 
   async setRole(id: string, role: 'user' | 'admin'): Promise<User | null> {
+    if (!isValidObjectId(id)) return null;
     const doc = await UserModel.findByIdAndUpdate(id, { $set: { role } }, { new: true }).lean();
     return doc ? mapUser(doc) : null;
   }
 
   async pushRecentIngredients(id: string, keys: string[], cap = 30): Promise<void> {
-    if (keys.length === 0) return;
+    if (keys.length === 0 || !isValidObjectId(id)) return;
     // Prepend new keys, de-dupe via $each + later $slice, keep most-recent-first.
     await UserModel.updateOne(
       { _id: id },
@@ -60,11 +65,13 @@ export class MongoUserRepo implements UserRepo {
   }
 
   async getRecentIngredients(id: string): Promise<string[]> {
+    if (!isValidObjectId(id)) return [];
     const doc = await UserModel.findById(id).select('recentIngredients').lean();
     return doc?.recentIngredients?.map((k) => String(k)) ?? [];
   }
 
   async delete(id: string): Promise<void> {
+    if (!isValidObjectId(id)) return;
     await UserModel.deleteOne({ _id: id });
   }
 

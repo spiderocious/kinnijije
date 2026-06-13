@@ -89,7 +89,11 @@ export interface CreateRecipeInput {
 
 export interface RecipeRepo {
   create(input: CreateRecipeInput): Promise<Recipe>;
+  // Admin-facing: any recipe by id (incl. drafts). Returns null for an
+  // unparseable id rather than throwing.
   findById(id: string): Promise<Recipe | null>;
+  // Consumer-facing: only published recipes are visible. Drafts → null.
+  findPublishedById(id: string): Promise<Recipe | null>;
   update(id: string, patch: Partial<CreateRecipeInput>): Promise<Recipe | null>;
   setStatus(id: string, status: RecipeStatus): Promise<Recipe | null>;
   setHero(id: string, key: string, kind: 'photo' | 'generated'): Promise<Recipe | null>;

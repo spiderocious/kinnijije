@@ -5,6 +5,7 @@ import { heroProxyUrl } from '../../lib/file-service.js';
 import type { CreateRecipeInput, RecipeRepo } from '../ports.js';
 import { buildPage, clampLimit, decodeCursor } from './cursor.js';
 import { mapRecipe } from './mappers.js';
+import { isValidObjectId } from './object-id.js';
 
 const toRecipe = (doc: Record<string, unknown>): Recipe => mapRecipe(doc, heroProxyUrl);
 
@@ -31,21 +32,33 @@ export class MongoRecipeRepo implements RecipeRepo {
   }
 
   async findById(id: string): Promise<Recipe | null> {
+    if (!isValidObjectId(id)) return null;
     const doc = await RecipeModel.findById(id).lean();
     return doc ? toRecipe(doc) : null;
   }
 
+  // Consumer-facing lookup: only published recipes are visible to normal users.
+  // Drafts are read by admins through the /admin/* routes.
+  async findPublishedById(id: string): Promise<Recipe | null> {
+    if (!isValidObjectId(id)) return null;
+    const doc = await RecipeModel.findOne({ _id: id, status: 'published' }).lean();
+    return doc ? toRecipe(doc) : null;
+  }
+
   async update(id: string, patch: Partial<CreateRecipeInput>): Promise<Recipe | null> {
+    if (!isValidObjectId(id)) return null;
     const doc = await RecipeModel.findByIdAndUpdate(id, { $set: patch }, { new: true }).lean();
     return doc ? toRecipe(doc) : null;
   }
 
   async setStatus(id: string, status: RecipeStatus): Promise<Recipe | null> {
+    if (!isValidObjectId(id)) return null;
     const doc = await RecipeModel.findByIdAndUpdate(id, { $set: { status } }, { new: true }).lean();
     return doc ? toRecipe(doc) : null;
   }
 
   async setHero(id: string, key: string, kind: 'photo' | 'generated'): Promise<Recipe | null> {
+    if (!isValidObjectId(id)) return null;
     const doc = await RecipeModel.findByIdAndUpdate(
       id,
       { $set: { heroImageKey: key, heroImageKind: kind } },
@@ -55,6 +68,7 @@ export class MongoRecipeRepo implements RecipeRepo {
   }
 
   async delete(id: string): Promise<void> {
+    if (!isValidObjectId(id)) return;
     await RecipeModel.deleteOne({ _id: id });
   }
 

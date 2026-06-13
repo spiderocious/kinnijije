@@ -96,6 +96,50 @@ describe('suggestions + recipes + favourites + feedback', () => {
     expect(after.body.data.items).toHaveLength(0);
   });
 
+  // Regression — BUG-1: a malformed (non-castable) recipe id must 404, not 500.
+  it('returns 404 (not 500) for a malformed recipe id', async () => {
+    const user = await registerUser();
+    const h = authHeader(user.tokens.access_token);
+    for (const bad of ['not-an-objectid', '123', 'zzz']) {
+      const res = await agent().get(`/api/v1/recipes/${bad}`).set(...h).expect(404);
+      expect(res.body.error.code).toBe('not_found');
+    }
+  });
+
+  // Regression — BUG-2: a draft recipe must NOT be visible to a normal user.
+  it('hides draft recipes from consumers (404), and blocks favouriting them', async () => {
+    const admin = await createAdmin();
+    // Create a recipe but DO NOT publish it (stays draft).
+    const created = await agent()
+      .post('/api/v1/admin/recipes')
+      .set(...authHeader(admin.tokens.access_token))
+      .send({
+        name: 'Secret Draft',
+        difficulty: 'easy',
+        cookTimeMinutes: 20,
+        cuisines: ['Nigerian'],
+        ingredients: [{ name: 'rice' }],
+        steps: [{ heading: 'Cook', description: 'Cook it.' }],
+      })
+      .expect(201);
+    const draftId = created.body.data.recipe.id;
+
+    const user = await registerUser();
+    const h = authHeader(user.tokens.access_token);
+
+    // Consumer GET → 404 (not 200 with the draft).
+    await agent().get(`/api/v1/recipes/${draftId}`).set(...h).expect(404);
+    // Can't favourite a draft.
+    await agent().post('/api/v1/favourites').set(...h).send({ recipeId: draftId }).expect(404);
+
+    // Admin can still read the draft via /admin/*.
+    const list = await agent()
+      .get('/api/v1/admin/recipes?status=draft')
+      .set(...authHeader(admin.tokens.access_token))
+      .expect(200);
+    expect(list.body.data.items.some((r: { id: string }) => r.id === draftId)).toBe(true);
+  });
+
   it('flags a step on a recipe', async () => {
     const admin = await createAdmin();
     const recipeId = await seedRecipe(admin.tokens.access_token);

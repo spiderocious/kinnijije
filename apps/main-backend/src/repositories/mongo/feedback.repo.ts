@@ -4,6 +4,7 @@ import { FeedbackModel } from '../../db/models/feedback.model.js';
 import type { FeedbackRepo } from '../ports.js';
 import { buildPage, clampLimit, decodeCursor } from './cursor.js';
 import { mapFeedback } from './mappers.js';
+import { isValidObjectId } from './object-id.js';
 
 export class MongoFeedbackRepo implements FeedbackRepo {
   async create(input: {
@@ -22,6 +23,7 @@ export class MongoFeedbackRepo implements FeedbackRepo {
   }
 
   async setStatus(id: string, status: FeedbackStatus): Promise<Feedback | null> {
+    if (!isValidObjectId(id)) return null;
     const doc = await FeedbackModel.findByIdAndUpdate(id, { $set: { status } }, { new: true }).lean();
     return doc ? mapFeedback(doc) : null;
   }

@@ -30,7 +30,8 @@ router.post(
     const userId = authUserId(req);
     const body = CreateFavouriteBody.parse(req.body);
 
-    const recipe = await repos.recipes.findById(body.recipeId);
+    // Only published recipes can be favourited (drafts/invalid ids → 404).
+    const recipe = await repos.recipes.findPublishedById(body.recipeId);
     if (!recipe) throw new NotFoundError('Recipe');
 
     if (await repos.favourites.exists(userId, body.recipeId)) {

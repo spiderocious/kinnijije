@@ -16,7 +16,7 @@ router.post(
   '/',
   asyncHandler(async (req, res) => {
     const body = CreateFeedbackBody.parse(req.body);
-    const recipe = await repos.recipes.findById(body.recipeId);
+    const recipe = await repos.recipes.findPublishedById(body.recipeId);
     if (!recipe) throw new NotFoundError('Recipe');
 
     const feedback = await repos.feedback.create({

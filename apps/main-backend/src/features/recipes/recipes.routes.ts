@@ -16,7 +16,9 @@ router.use(requireAuth);
 router.get(
   '/:id',
   asyncHandler(async (req, res) => {
-    const recipe = await repos.recipes.findById(param(req, 'id'));
+    // Consumers only see published recipes; a draft (or unknown/invalid id)
+    // yields a clean 404, never a leak or a 500.
+    const recipe = await repos.recipes.findPublishedById(param(req, 'id'));
     if (!recipe) throw new NotFoundError('Recipe');
     return ResponseUtil.ok(res, { recipe: presentRecipe(recipe) });
   }),

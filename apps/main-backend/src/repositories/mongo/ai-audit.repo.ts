@@ -4,6 +4,7 @@ import { AiAuditModel } from '../../db/models/ai-audit.model.js';
 import type { AiAuditRepo, CreateAiAuditInput } from '../ports.js';
 import { buildPage, clampLimit, decodeCursor } from './cursor.js';
 import { mapAiAudit } from './mappers.js';
+import { isValidObjectId } from './object-id.js';
 
 export class MongoAiAuditRepo implements AiAuditRepo {
   async create(input: CreateAiAuditInput): Promise<{ id: string }> {
@@ -26,6 +27,7 @@ export class MongoAiAuditRepo implements AiAuditRepo {
   }
 
   async findById(id: string): Promise<AiAudit | null> {
+    if (!isValidObjectId(id)) return null;
     const doc = await AiAuditModel.findById(id).lean();
     return doc ? mapAiAudit(doc) : null;
   }
