@@ -9,7 +9,7 @@ import {
   IconPot,
   IconUser,
   IconAi,
-  IconType,
+  IconCutlery,
   IconSettings,
   IconFlag,
   IconClose,
@@ -34,7 +34,7 @@ const NAV: readonly NavItem[] = [
   { to: ROUTES.ADMIN_RECIPES, label: 'Recipes', icon: <IconPot size={18} /> },
   { to: ROUTES.ADMIN_USERS, label: 'Users', icon: <IconUser size={18} /> },
   { to: ROUTES.ADMIN_AI_AUDIT, label: 'AI audit', icon: <IconAi size={18} /> },
-  { to: ROUTES.ADMIN_PROMPTS, label: 'Prompts', icon: <IconType size={18} /> },
+  { to: ROUTES.ADMIN_PROMPTS, label: 'Prompts', icon: <IconCutlery size={18} /> },
   { to: ROUTES.ADMIN_FEATURE_FLAGS, label: 'Feature flags', icon: <IconSettings size={18} /> },
   { to: ROUTES.ADMIN_FEEDBACK, label: 'Feedback', icon: <IconFlag size={18} /> },
 ];
@@ -48,7 +48,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const { pathname } = useLocation();
   return (
     <nav aria-label="Admin sections" className="flex flex-col gap-1">
-      <Repeat of={NAV}>
+      <Repeat each={[...NAV]}>
         {(item) => {
           const on = isActive(pathname, item.to);
           return (

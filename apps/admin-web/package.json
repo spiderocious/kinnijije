@@ -16,6 +16,8 @@
     "@kinnijije/core": "workspace:*",
     "@kinnijije/ui": "workspace:*",
     "@tanstack/react-query": "^5.62.0",
+    "ky": "^1.7.5",
+    "meemaw": "^1.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^6.28.0"
