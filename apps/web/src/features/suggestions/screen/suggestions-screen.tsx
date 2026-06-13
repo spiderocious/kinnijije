@@ -35,13 +35,13 @@ export function SuggestionsScreen() {
     );
   };
 
-  // Initial run once.
+  // Initial run once, when ingredients are present. `ran` guards re-entry, so the
+  // effect body is idempotent across the StrictMode double-invoke in dev.
   useEffect(() => {
     if (ran.current || ingredients.length === 0) return;
     ran.current = true;
     run([...seenIds.current]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ingredients]);
 
   if (ingredients.length === 0) {
     return <Navigate to={ROUTES.KITCHEN} replace />;

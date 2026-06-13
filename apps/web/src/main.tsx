@@ -13,6 +13,7 @@ import '@fontsource/inter/800.css';
 import '@fontsource-variable/jetbrains-mono';
 
 import { App } from './app.tsx';
+import { registerServiceWorker } from '@shared/services/register-sw.ts';
 import '@kinnijije/ui/styles.css';
 import './styles.css';
 
@@ -27,3 +28,5 @@ createRoot(rootEl).render(
     <App />
   </StrictMode>,
 );
+
+registerServiceWorker();

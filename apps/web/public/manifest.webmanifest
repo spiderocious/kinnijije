@@ -1,0 +1,16 @@
+{
+  "name": "KinniJije",
+  "short_name": "KinniJije",
+  "description": "Tell it what's in your kitchen. It tells you what to cook tonight.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F8EFDF",
+  "theme_color": "#EDAE05",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

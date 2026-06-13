@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { configureApiClient } from '@kinnijije/api';
 
 import { App } from './app.tsx';
+import '@kinnijije/ui/styles.css';
 import './styles.css';
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:9093';
