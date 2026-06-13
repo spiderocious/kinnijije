@@ -3,9 +3,16 @@ import { createServer, type Server } from 'node:http';
 import { logger } from '@lib/logger.js';
 
 import { buildApp } from './app.js';
+import { bootstrapEnvChecks } from './env.runtime.js';
+import { connectDb, disconnectDb } from './db/connection.js';
+import { seedDefaults } from './bootstrap.js';
 import { env } from './env.js';
 
-const startHttpApp = (): Server => {
+const start = async (): Promise<Server> => {
+  bootstrapEnvChecks();
+  await connectDb(env.MONGODB_URI);
+  await seedDefaults();
+
   const app = buildApp();
   const server = createServer(app);
   server.listen(env.PORT, () => {
@@ -14,11 +21,16 @@ const startHttpApp = (): Server => {
   return server;
 };
 
-const server = startHttpApp();
+const serverPromise = start().catch((err) => {
+  logger.fatal({ err }, 'failed to start');
+  process.exit(1);
+});
 
 const shutdown = async (signal: string): Promise<void> => {
   logger.info({ signal }, 'shutting down gracefully');
-  await new Promise<void>((resolve) => server.close(() => resolve()));
+  const server = await serverPromise;
+  if (server) await new Promise<void>((resolve) => server.close(() => resolve()));
+  await disconnectDb();
   process.exit(0);
 };
 

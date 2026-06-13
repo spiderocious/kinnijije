@@ -23,11 +23,6 @@ export function HomeScreen() {
         <Link to={ROUTES.PREVIEW}>
           <AppButton variant="primary">Open UI preview</AppButton>
         </Link>
-        <Link to={ROUTES.EXAMPLE}>
-          <AppButton variant="secondary" type="button">
-            Example
-          </AppButton>
-        </Link>
       </div>
 
       <section className="mt-12 rounded-card border-2 border-[var(--ink)] bg-[var(--sheet)] p-4 text-sm shadow-paint">

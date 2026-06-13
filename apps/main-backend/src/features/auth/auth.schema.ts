@@ -12,3 +12,8 @@ export const RegisterBody = z.object({
   password: z.string().min(8),
 });
 export type RegisterBody = z.infer<typeof RegisterBody>;
+
+export const RefreshBody = z.object({
+  refresh_token: z.string().min(1),
+});
+export type RefreshBody = z.infer<typeof RefreshBody>;

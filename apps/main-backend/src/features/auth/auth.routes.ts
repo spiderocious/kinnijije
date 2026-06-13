@@ -3,21 +3,17 @@ import { Router, type IRouter } from 'express';
 import { asyncHandler } from '@lib/http/asyncHandler.js';
 import { ResponseUtil } from '@lib/response.js';
 
-import { LoginBody, RegisterBody } from './auth.schema.js';
+import * as authService from './auth.service.js';
+import { LoginBody, RefreshBody, RegisterBody } from './auth.schema.js';
 
 const router: IRouter = Router();
-
-// Stub endpoints — flesh out with a real auth.service.ts + auth.repo.ts backed
-// by your data layer. Kept here to demonstrate the feature shape.
 
 router.post(
   '/register',
   asyncHandler(async (req, res) => {
     const body = RegisterBody.parse(req.body);
-    return ResponseUtil.created(res, {
-      user: { email: body.email, name: body.name },
-      tokens: { access_token: 'stub.access', refresh_token: 'stub.refresh' },
-    });
+    const result = await authService.register(body);
+    return ResponseUtil.created(res, result);
   }),
 );
 
@@ -25,23 +21,27 @@ router.post(
   '/login',
   asyncHandler(async (req, res) => {
     const body = LoginBody.parse(req.body);
-    return ResponseUtil.ok(res, {
-      user: { email: body.email },
-      tokens: { access_token: 'stub.access', refresh_token: 'stub.refresh' },
-    });
+    const result = await authService.login(body);
+    return ResponseUtil.ok(res, result);
   }),
 );
 
 router.post(
   '/refresh',
-  asyncHandler(async (_req, res) =>
-    ResponseUtil.ok(res, { access_token: 'stub.access', refresh_token: 'stub.refresh' }),
-  ),
+  asyncHandler(async (req, res) => {
+    const body = RefreshBody.parse(req.body);
+    const tokens = await authService.refresh(body.refresh_token);
+    return ResponseUtil.ok(res, tokens);
+  }),
 );
 
 router.post(
   '/logout',
-  asyncHandler(async (_req, res) => ResponseUtil.noContent(res)),
+  asyncHandler(async (req, res) => {
+    const body = RefreshBody.parse(req.body);
+    await authService.logout(body.refresh_token);
+    return ResponseUtil.noContent(res);
+  }),
 );
 
 export default router;
