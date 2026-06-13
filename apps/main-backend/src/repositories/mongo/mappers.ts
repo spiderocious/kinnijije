@@ -84,12 +84,14 @@ export function mapRecipe(doc: Lean, resolveHeroUrl: (key: string) => string): R
   };
 }
 
-export function mapFavourite(doc: Lean, resolveHeroUrl: (key: string) => string): Favourite {
-  const snapshot = (doc['savedSnapshot'] ?? {}) as Lean;
+export function mapFavourite(doc: Lean): Favourite {
+  // The snapshot is an already-presented Recipe (wire shape with `id` and a
+  // resolved `heroImageUrl`), not a raw Mongo doc — pass it straight through.
+  const snapshot = (doc['savedSnapshot'] ?? {}) as Recipe;
   return {
     id: idStr(doc['_id']),
     recipeId: idStr(doc['recipeId']),
-    recipe: mapRecipe(snapshot, resolveHeroUrl),
+    recipe: snapshot,
     createdAt: iso(doc['createdAt']),
   };
 }

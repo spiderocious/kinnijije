@@ -16,8 +16,6 @@ import { errorHandler } from '@middlewares/errorHandler.middleware.js';
 import { requestIdMiddleware } from '@middlewares/requestId.middleware.js';
 import { requestLogMiddleware } from '@middlewares/requestLog.middleware.js';
 
-import { env } from './env.js';
-
 // Registration order matters: specific paths before parameterised ones, and
 // broad router mounts before narrower siblings under the same prefix. Admin and
 // auth are mounted before the consumer feature routers; `me` carries the
@@ -42,7 +40,7 @@ export const buildApp = (): express.Express => {
   app.use(helmet());
   app.use(
     cors({
-      origin: env.WEB_BASE_URL === '*' ? true : env.WEB_BASE_URL,
+      origin: "*",
       credentials: true,
     }),
   );
