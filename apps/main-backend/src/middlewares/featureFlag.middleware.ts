@@ -8,11 +8,24 @@ import { repos } from '../repositories/index.js';
 // feature_disabled. `fallback` is used when the flag row doesn't exist yet
 // (default: enabled, so a missing flag never accidentally blocks a route).
 export function requireFlag(key: string, fallback = true) {
-  return async (_req: Request, _res: Response, next: NextFunction): Promise<void> => {
-    const enabled = await repos.featureFlags.isEnabled(key, fallback);
-    if (!enabled) {
-      throw new AppError('feature_disabled', `Feature "${key}" is currently disabled`, HTTP_STATUS.FORBIDDEN);
-    }
-    next();
+  return (_req: Request, _res: Response, next: NextFunction): void => {
+    // Async middleware must funnel errors to next() — Express 4 doesn't catch
+    // rejections from an async middleware automatically.
+    repos.featureFlags
+      .isEnabled(key, fallback)
+      .then((enabled) => {
+        if (!enabled) {
+          next(
+            new AppError(
+              'feature_disabled',
+              `Feature "${key}" is currently disabled`,
+              HTTP_STATUS.FORBIDDEN,
+            ),
+          );
+          return;
+        }
+        next();
+      })
+      .catch(next);
   };
 }

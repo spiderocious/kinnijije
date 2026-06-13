@@ -11,6 +11,7 @@
     "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
     "start": "node --env-file=.env dist/server.js",
     "lint": "eslint --config ../../eslint.config.mjs 'src/**/*.ts'",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

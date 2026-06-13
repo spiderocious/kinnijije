@@ -1,12 +1,11 @@
 import type { Recipe, Favourite, CursorPage } from '@kinnijije/core';
 
 import { FavouriteModel } from '../../db/models/favourite.model.js';
-import { heroProxyUrl } from '../../lib/file-service.js';
 import type { FavouriteRepo } from '../ports.js';
 import { buildPage, clampLimit, decodeCursor } from './cursor.js';
 import { mapFavourite } from './mappers.js';
 
-const toFav = (doc: Record<string, unknown>): Favourite => mapFavourite(doc, heroProxyUrl);
+const toFav = (doc: Record<string, unknown>): Favourite => mapFavourite(doc);
 
 export class MongoFavouriteRepo implements FavouriteRepo {
   async create(input: { userId: string; recipeId: string; snapshot: Recipe }): Promise<Favourite> {

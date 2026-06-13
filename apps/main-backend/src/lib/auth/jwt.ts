@@ -15,7 +15,7 @@ export interface AccessClaims {
 
 export function signAccessToken(claims: AccessClaims): string {
   return jwt.sign(claims, env.JWT_ACCESS_SECRET, {
-    expiresIn: env.JWT_ACCESS_EXPIRES_IN as jwt.SignOptions['expiresIn'],
+    expiresIn: env.JWT_ACCESS_EXPIRES_IN as NonNullable<jwt.SignOptions['expiresIn']>,
   });
 }
 
