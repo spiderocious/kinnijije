@@ -28,17 +28,54 @@ flags (all on) and the 3 default AI prompts (active v1).
 
 ---
 
-## Seed accounts
+## Seed accounts — how to log in & how to get an admin
 
-There is no pre-seeded user fixture for the running server (single-user product;
-sign up directly). For admin access, create one user and flip its role in Mongo
-to `admin`, or use the test helper `createAdmin()`. RBAC is enforced by
-`requireRole('admin')` on every `/admin/*` route.
+⚠️ **There is no seeded admin and no API endpoint that creates one.**
+`POST /auth/register` always sets `role: "user"` (you cannot self-promote), and
+`PATCH /admin/users/:id {role:"admin"}` itself needs an admin token. So the
+**first** admin must be made with a direct Mongo write. There is no admin-seeding
+code in `bootstrap.ts` (it seeds flags + prompts only).
+
+### Make a user (normal account)
+```bash
+curl -s -X POST http://localhost:9093/api/v1/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"user@test.test","name":"User","password":"Password123!"}'
+# → 201, returns { user, tokens }. Use tokens.access_token as Bearer.
+```
+
+### Make an admin (register → flip role in Mongo → log in)
+```bash
+# 1. register a normal user
+curl -s -X POST http://localhost:9093/api/v1/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"admin@test.test","name":"Admin","password":"Password123!"}'
+
+# 2. promote it directly in Mongo (the DB the server uses)
+mongosh "mongodb://127.0.0.1:27017/kinnijije" --quiet \
+  --eval "db.users.updateOne({email:'admin@test.test'},{\$set:{role:'admin'}})"
+
+# 3. log in — the role is baked into the JWT AT LOGIN, so log in AFTER the flip
+curl -s -X POST http://localhost:9093/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"admin@test.test","password":"Password123!"}' \
+  | jq -r .data.tokens.access_token
+# → use this token as `Authorization: Bearer <token>` on every /admin/* route.
+```
+> Order matters: if you log in *before* the flip, the token carries `role:user`
+> and `/admin/*` returns 403. Re-login after promoting.
+
+`createAdmin()` in `apps/main-backend/test/helpers.ts` does the same thing for the
+vitest suite (insert user with `role:'admin'`, then log in).
 
 | Field | Value |
 |-------|-------|
+| Mongo URI (dev) | `mongodb://127.0.0.1:27017/kinnijije` |
 | Test user password | `Password123!` |
 | Test admin password | `Password123!` |
+
+> An `admin@kinnijije.app` row exists in the dev DB but its password is **not
+> recorded anywhere** — don't rely on it; make your own admin with the steps above.
 
 ---
 
